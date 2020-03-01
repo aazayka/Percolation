@@ -10,10 +10,10 @@ public class Percolation {
     public Percolation(int n){
         if(n<=0) throw new IllegalArgumentException("n should be positive, but got " + n);
         fields = new boolean[n][n];
-        tree = new int[n*n+2];
-        weights = new int[n*n+2];
-        tree[0] = 0; tree[n*n+1] = n*n+1;
-        weights[0] = 1; weights[n*n+1] = 1;
+        tree = new int[n*n+1];
+        weights = new int[n*n+1];
+        tree[0] = 0;
+        weights[0] = 1;
         this.N = n;
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {
@@ -27,14 +27,15 @@ public class Percolation {
 
     private int conrvertToScalar(int row, int col){
         if(row == 0) return 0;
-        if(row == N+1) return N*N + 1;
+        //if(row == N+1) return N*N + 1;
         return (row-1) * N + col;
     }
 
     private void union(int row1, int col1, int row2, int col2){
         if(col1 > N || col1 < 1) return;
         if(col2 > N || col2 < 1) return;
-        if((row1 >= 1 && row1 <= N && !isOpen(row1, col1))
+        if(row1 > N || row2 > N) return;
+            if((row1 >= 1 && row1 <= N && !isOpen(row1, col1))
            ||(row2 >= 1 && row2 <= N && !isOpen(row2, col2))) return;
         int n1 = root(conrvertToScalar(row1, col1));
         int n2 = root(conrvertToScalar(row2, col2));
@@ -86,7 +87,7 @@ public class Percolation {
         checkArg("isFull", "row", row);
         checkArg("isFull", "col", col);
 
-        return root(0) == root(conrvertToScalar(row, col));
+        return isOpen(row, col) && root(0) == root(conrvertToScalar(row, col));
     }
 
     // returns the number of open sites
@@ -96,7 +97,12 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates(){
-        return root(0) == root(N*N+1);
+        for(int i = 1; i <= N; i++){
+            if(isFull(N, i)){
+                return true;
+            }
+        }
+        return false;
     }
 
     // // test client (optional)
