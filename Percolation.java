@@ -1,7 +1,7 @@
 public class Percolation {
-    private Node[] tree;
+    private final Node[] tree;
+    private final int N;
     private int numOpen = 0;
-    private int N;
     private boolean percolates;
 
     private class Node {
@@ -19,8 +19,17 @@ public class Percolation {
             connectBottom = (i == N);
         }
 
-        public void open() {
-            isOpen = true;
+        // bad hack, good optimization
+        public void open(int row, int col) {
+            if (!this.isOpen) {
+                isOpen = true;
+                numOpen++;
+                union(row, col, row - 1, col);
+                union(row, col, row + 1, col);
+                union(row, col, row, col - 1);
+                union(row, col, row, col + 1);
+            }
+            percolates = percolates || (connectTop && connectBottom);
         }
 
         public void setConnectors(Node otherNode) {
@@ -106,14 +115,7 @@ public class Percolation {
         checkArg("open", "row", row);
         checkArg("open", "col", col);
         int k = conrvertToScalar(row, col);
-        if (!isOpen(k)) {
-            tree[k].open();
-            numOpen++;
-            union(row, col, row - 1, col);
-            union(row, col, row + 1, col);
-            union(row, col, row, col - 1);
-            union(row, col, row, col + 1);
-        }
+        tree[k].open(row, col);
     }
 
     private boolean isOpen(int n2) {
