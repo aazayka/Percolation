@@ -5,7 +5,7 @@ public class Percolation {
     private boolean percolates;
 
     private class Node {
-        int parent;
+        byte parent;
 //        int weight;
 
         boolean isOpen;
@@ -13,7 +13,7 @@ public class Percolation {
         boolean connectBottom;
 
         public Node(int i, int j) {
-            this.parent = conrvertToScalar(i, j);
+            this.parent = (byte) conrvertToScalar(i, j);
 //            this.weight = 1;
             connectTop = (i == 1);
             connectBottom = (i == N);
@@ -49,7 +49,7 @@ public class Percolation {
     public Percolation(int n) {
         if (n <= 0) throw new IllegalArgumentException("n should be positive, but got " + n);
         tree = new Node[n * n];
-        this.N = n;
+        this.N = (byte) n;
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {
                 tree[conrvertToScalar(i, j)] = new Node(i, j);
@@ -79,7 +79,7 @@ public class Percolation {
         Node rootNode1 = tree[root1];
         Node rootNode2 = tree[root2];
 
-        rootNode2.parent = root1;
+        rootNode2.parent = (byte) root1;
         // if (rootNode1.weight > rootNode2.weight) {
         //     rootNode2.parent = root1;
         //     rootNode1.weight += rootNode2.weight;
@@ -100,7 +100,7 @@ public class Percolation {
             i = tree[i].parent;
             tree[i].parent = tree[tree[i].parent].parent;
         }
-        node.parent = i;
+        node.parent = (byte) i;
         node.setConnectors(tree[i]);
         return i;
     }

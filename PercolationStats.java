@@ -8,17 +8,20 @@ public class PercolationStats {
     private double stddev;
 
     // perform independent trials on an n-by-n grid
-    public PercolationStats(int n, int trials){
-        if(n <= 0 || trials <= 0) throw new IllegalArgumentException("Incorrect n = " + n + " or trials = " + trials);
+    public PercolationStats(int n, int trials) {
+        if (n <= 0 || trials <= 0)
+            throw new IllegalArgumentException("Incorrect n = " + n + " or trials = " + trials);
         experiments = new double[trials];
         N = n;
         Percolation p;
         for (int i = 0; i < trials; i++) {
             p = new Percolation(n);
             runTests(p);
-            experiments[i] = (double) p.numberOfOpenSites() / (n*n);
+            experiments[i] = (double) p.numberOfOpenSites() / (n * n);
             p = null;
         }
+        mean = StdStats.mean(experiments);
+        stddev = StdStats.stddev(experiments);
     }
 
     private void runTests(Percolation p) {
@@ -29,29 +32,12 @@ public class PercolationStats {
 
     // sample mean of percolation threshold
     public double mean(){
-        mean = StdStats.mean(experiments);
         return mean;
-        /*
-        double sum = 0.0;
-        for (int i = 0; i < experiments.length; i++) {
-            sum += experiments[i];
-        }
-        return sum / experiments.length;
-        */
     }
 
     // sample standard deviation of percolation threshold
     public double stddev(){
-        stddev = StdStats.stddev(experiments);
         return stddev;
-        /*
-        double mean = mean();
-        double sum = 0.0;
-        for (int i = 0; i < experiments.length; i++) {
-            sum += Math.pow(experiments[i] - mean, 2);
-        }
-        return Math.sqrt(sum / (experiments.length - 1));
-        */
     }
 
     // low endpoint of 95% confidence interval
