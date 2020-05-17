@@ -41,7 +41,7 @@ public class Percolation {
                 this.connectTop = true;
                 otherNode.connectTop = true;
             }
-            percolates = connectTop & connectBottom;
+            percolates = percolates || (connectTop & connectBottom);
         }
     }
 
