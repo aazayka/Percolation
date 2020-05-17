@@ -6,7 +6,7 @@ public class Percolation {
 
     private class Node {
         int parent;
-        int weight;
+//        int weight;
 
         boolean isOpen;
         boolean connectTop;
@@ -14,7 +14,7 @@ public class Percolation {
 
         public Node(int i, int j) {
             this.parent = conrvertToScalar(i, j);
-            this.weight = 1;
+//            this.weight = 1;
             connectTop = (i == 1);
             connectBottom = (i == N);
         }
@@ -79,14 +79,15 @@ public class Percolation {
         Node rootNode1 = tree[root1];
         Node rootNode2 = tree[root2];
 
-        if (rootNode1.weight > rootNode2.weight) {
-            rootNode2.parent = root1;
-            rootNode1.weight += rootNode2.weight;
-        }
-        else {
-            rootNode1.parent = root2;
-            rootNode2.weight += rootNode1.weight;
-        }
+        rootNode2.parent = root1;
+        // if (rootNode1.weight > rootNode2.weight) {
+        //     rootNode2.parent = root1;
+        //     rootNode1.weight += rootNode2.weight;
+        // }
+        // else {
+        //     rootNode1.parent = root2;
+        //     rootNode2.weight += rootNode1.weight;
+        // }
         rootNode1.setConnectors(rootNode2);
         node1.setConnectors(rootNode1);
         node2.setConnectors(rootNode2);
