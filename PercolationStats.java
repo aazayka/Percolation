@@ -2,7 +2,7 @@ import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
-    private double[] experiments;
+    private final double[] experiments;
     private final int N;
     private double mean;
     private double stddev;
@@ -42,14 +42,16 @@ public class PercolationStats {
 
     // sample standard deviation of percolation threshold
     public double stddev(){
-        //return StdStats.stddev(experiments);
-
+        stddev = StdStats.stddev(experiments);
+        return stddev;
+        /*
+        double mean = mean();
         double sum = 0.0;
         for (int i = 0; i < experiments.length; i++) {
             sum += Math.pow(experiments[i] - mean, 2);
         }
-        stddev = Math.sqrt(sum / (experiments.length - 1));
-        return stddev;
+        return Math.sqrt(sum / (experiments.length - 1));
+        */
     }
 
     // low endpoint of 95% confidence interval
