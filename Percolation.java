@@ -1,10 +1,10 @@
 public class Percolation {
     private Node[] tree;
     private int numOpen = 0;
-    private static int N;
-    private static boolean percolates;
+    private int N;
+    private boolean percolates;
 
-    private static class Node {
+    private class Node {
         int parent;
         int weight;
 
@@ -48,7 +48,7 @@ public class Percolation {
         }
     }
 
-    private static int conrvertToScalar(int row, int col) {
+    private int conrvertToScalar(int row, int col) {
         return (row - 1) * N + col - 1;
     }
 
@@ -133,7 +133,7 @@ public class Percolation {
 
         final Node node = tree[conrvertToScalar(row, col)];
         final boolean result = node.isOpen && (node.connectTop || tree[root(node)].connectTop);
-        node.connectTop = result;
+        node.connectTop |= result;
         return result;
     }
 
