@@ -1,59 +1,38 @@
+import edu.princeton.cs.algs4.WeightedQuickUnionUF;
+
 public class Percolation {
-    private final Node[] tree;
+    private final WeightedQuickUnionUF tree;
+    private final boolean[] isOpen;
+    private final boolean[] connectTop;
+    private final boolean[] connectBottom;
     private final int N;
-    private int numOpen = 0;
     private boolean percolates;
+    private int numOpen;
 
-    private class Node {
-        byte parent;
-//        int weight;
-
-        boolean isOpen;
-        boolean connectTop;
-        boolean connectBottom;
-
-        public Node(int i, int j) {
-            this.parent = (byte) conrvertToScalar(i, j);
-//            this.weight = 1;
-            connectTop = (i == 1);
-            connectBottom = (i == N);
+    private void setConnectors(int thisNode, int otherNode) {
+        if (connectBottom[thisNode] || connectBottom[otherNode]) {
+            this.connectBottom[thisNode] = true;
+            connectBottom[otherNode] = true;
         }
-
-        // bad hack, good optimization
-        public void open(int row, int col) {
-            if (!this.isOpen) {
-                isOpen = true;
-                numOpen++;
-                union(row, col, row - 1, col);
-                union(row, col, row + 1, col);
-                union(row, col, row, col - 1);
-                union(row, col, row, col + 1);
-            }
-            percolates = percolates || (connectTop && connectBottom);
+        if (connectTop[thisNode] || connectTop[otherNode]) {
+            connectTop[thisNode] = true;
+            connectTop[otherNode] = true;
         }
-
-        public void setConnectors(Node otherNode) {
-            if (this.connectBottom || otherNode.connectBottom) {
-                this.connectBottom = true;
-                otherNode.connectBottom = true;
-            }
-            if (this.connectTop || otherNode.connectTop) {
-                this.connectTop = true;
-                otherNode.connectTop = true;
-            }
-            percolates = percolates || (connectTop & connectBottom);
-        }
+        percolates = percolates || (connectTop[thisNode] & connectBottom[otherNode]);
     }
 
     // creates n-by-n grid, with all sites initially blocked
     public Percolation(int n) {
         if (n <= 0) throw new IllegalArgumentException("n should be positive, but got " + n);
-        tree = new Node[n * n];
-        this.N = (byte) n;
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= n; j++) {
-                tree[conrvertToScalar(i, j)] = new Node(i, j);
-            }
+        N = n;
+        final int arraySize = N * N;
+        tree = new WeightedQuickUnionUF(arraySize);
+        connectTop = new boolean[arraySize];
+        connectBottom = new boolean[arraySize];
+        isOpen = new boolean[arraySize];
+        for (int i = 0; i < N; i++) {
+            connectTop[i] = true;
+            connectBottom[arraySize - i - 1] = true;
         }
     }
 
@@ -68,41 +47,19 @@ public class Percolation {
         if (row1 > N || row1 < 1) return;
         if (row2 > N || row2 < 1) return;
 
-        final Node node1 = tree[conrvertToScalar(row1, col1)];
-        final Node node2 = tree[conrvertToScalar(row2, col2)];
-
-        if (!node1.isOpen || !node2.isOpen)
+        final int node1 = conrvertToScalar(row1, col1);
+        final int node2 = conrvertToScalar(row2, col2);
+        if (!isOpen(node1) || !isOpen(node2))
             return;
-        int root1 = root(node1);
-        int root2 = root(node2);
 
-        Node rootNode1 = tree[root1];
-        Node rootNode2 = tree[root2];
+        final int rootNode1 = tree.find(node1);
+        final int rootNode2 = tree.find(node2);
 
-        rootNode2.parent = (byte) root1;
-        // if (rootNode1.weight > rootNode2.weight) {
-        //     rootNode2.parent = root1;
-        //     rootNode1.weight += rootNode2.weight;
-        // }
-        // else {
-        //     rootNode1.parent = root2;
-        //     rootNode2.weight += rootNode1.weight;
-        // }
-        rootNode1.setConnectors(rootNode2);
-        node1.setConnectors(rootNode1);
-        node2.setConnectors(rootNode2);
-    }
+        tree.union(node1, node2);
 
-
-    private int root(Node node) {
-        int i = node.parent;
-        while (i != tree[i].parent) {
-            i = tree[i].parent;
-            tree[i].parent = tree[tree[i].parent].parent;
-        }
-        node.parent = (byte) i;
-        node.setConnectors(tree[i]);
-        return i;
+        setConnectors(rootNode1, rootNode2);
+        setConnectors(node1, rootNode1);
+        setConnectors(node2, rootNode2);
     }
 
     private void checkArg(String procName, String fieldName, int val) {
@@ -116,11 +73,20 @@ public class Percolation {
         checkArg("open", "row", row);
         checkArg("open", "col", col);
         int k = conrvertToScalar(row, col);
-        tree[k].open(row, col);
+
+        if (!isOpen[k]) {
+            isOpen[k] = true;
+            numOpen++;
+            union(row, col, row - 1, col);
+            union(row, col, row + 1, col);
+            union(row, col, row, col - 1);
+            union(row, col, row, col + 1);
+        }
+        percolates = percolates || (connectTop[k] && connectBottom[k]);
     }
 
     private boolean isOpen(int n2) {
-        return tree[n2].isOpen;
+        return isOpen[n2];
     }
     // is the site (row, col) open?
     public boolean isOpen(int row, int col) {
@@ -134,9 +100,9 @@ public class Percolation {
         checkArg("isFull", "row", row);
         checkArg("isFull", "col", col);
 
-        final Node node = tree[conrvertToScalar(row, col)];
-        final boolean result = node.isOpen && (node.connectTop || tree[root(node)].connectTop);
-        node.connectTop |= result;
+        final int k = conrvertToScalar(row, col);
+        final boolean result = isOpen(k) && (connectTop[k] || connectTop[tree.find(k)]);
+        connectTop[k] |= result;
         return result;
     }
 
